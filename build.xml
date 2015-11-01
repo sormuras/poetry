@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." name="sormuras/poetry" default="test">
+
+	<tstamp>
+		<format property="timestamp" pattern="yyyyMMddHHmm" />
+	</tstamp>
+
+	<property name="version.number" value="1.0" />
+	<property name="version.javapoet" value="1.4.0-20151028.012030-16" />
+	<property name="version.combined" value="${version.number}-${version.javapoet}" />
+	<property name="dir.out" value="bin/ant" />
+
+	<target name="clean">
+		<delete dir="${dir.out}" />
+	</target>
+
+	<target name="init" depends="clean">
+		<echo>be*free</echo>
+		<mkdir dir="${dir.out}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile and jar sources">
+		<mkdir dir="${dir.out}/main/classes" />
+		<javac destdir="${dir.out}/main/classes" debug="yes" deprecation="no" optimize="no" encoding="UTF-8" includeantruntime="no">
+			<classpath>
+				<pathelement path="lib/javapoet-${version.javapoet}.jar" />
+			</classpath>
+			<src path="src/main" />
+		</javac>
+		<jar destfile="${dir.out}/poetry-${version.number}.jar">
+			<fileset dir="${dir.out}/main/classes" />
+			<zipfileset src="lib/javapoet-${version.javapoet}.jar" />
+			<manifest>
+				<attribute name="Implementation-Version" value="${version.combined}" />
+			</manifest>
+		</jar>
+		<jar destfile="${dir.out}/poetry-${version.number}-sources.jar" defaultexcludes="no">
+			<fileset dir="src/main" />
+		</jar>
+	</target>
+
+	<target name="test" depends="compile" description="execute all tests">
+		<path id="junit.class.path">
+			<pathelement path="${dir.out}/test/classes" />
+			<pathelement path="${dir.out}/poetry-${version.number}.jar" />
+			<pathelement path="lib/test/junit-4.12.jar" />
+			<pathelement path="lib/test/java-hamcrest-2.0.0.0.jar" />
+		</path>
+
+		<mkdir dir="${dir.out}/test/classes" />
+		<javac destdir="${dir.out}/test/classes" encoding="UTF-8" includeantruntime="no">
+			<classpath refid="junit.class.path" />
+			<src path="src/test" />
+		</javac>
+
+		<copy todir="${dir.out}/test/classes">
+			<fileset dir="src/test" includes="META-INF/**/*" />
+		</copy>
+
+		<mkdir dir="${dir.out}/test-result" />
+		<junit printsummary="yes" fork="yes" haltonfailure="no" showoutput="yes" failureproperty="test.failed">
+			<jvmarg value="-Dfile.encoding=UTF-8" />
+			<sysproperty key="ant.running" value="true" />
+			<classpath refid="junit.class.path" />
+			<formatter type="xml" />
+			<assertions>
+				<enable />
+			</assertions>
+			<batchtest todir="${dir.out}/test-result">
+				<fileset dir="src/test">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<fail message="Test failure detected, check test results." if="test.failed" />
+	</target>
+
+</project>
