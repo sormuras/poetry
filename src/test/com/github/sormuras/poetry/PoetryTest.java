@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -73,17 +75,20 @@ public class PoetryTest {
   @Test
   public void testA3() throws Exception {
     Source source = new Source("A3", "interface A3 { void a3(@" + T + " int[][][] a3); }");
-    source.getCompilerProcessors().add(new A3());
+    A3 a3 = new A3();
+    source.getCompilerProcessors().add(a3);
     source.compile();
+    Assert.assertEquals(1, a3.names.size());
+    Assert.assertEquals("@" + T + " int[][][]", a3.names.get(0).toString());
   }
 
   @SupportedAnnotationTypes("com.github.sormuras.poetry.PoetryTest.Tag")
   private class A3 extends AbstractProcessor {
+    List<TypeName> names = new ArrayList<>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
       for (Element element : roundEnv.getElementsAnnotatedWith(Tag.class)) {
-        TypeName typeName = Poetry.annotated(element.asType());
-        Assert.assertEquals("@" + T + " int[][][]", typeName.toString());
+        names.add(Poetry.annotated(element.asType()));
       }
       return true;
     }
