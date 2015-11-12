@@ -6,7 +6,7 @@
 		<format property="timestamp" pattern="yyyyMMddHHmm" />
 	</tstamp>
 
-	<property name="version.number" value="1.0" />
+	<property name="version.number" value="1.02" />
 	<property name="version.javapoet" value="1.4.0-20151028.012030-16" />
 	<property name="version.combined" value="${version.number}-${version.javapoet}" />
 	<property name="dir.out" value="bin/ant" />
@@ -30,7 +30,6 @@
 		</javac>
 		<jar destfile="${dir.out}/poetry-${version.number}.jar">
 			<fileset dir="${dir.out}/main/classes" />
-			<zipfileset src="lib/javapoet-${version.javapoet}.jar" />
 			<manifest>
 				<attribute name="Implementation-Version" value="${version.combined}" />
 			</manifest>
@@ -38,12 +37,20 @@
 		<jar destfile="${dir.out}/poetry-${version.number}-sources.jar" defaultexcludes="no">
 			<fileset dir="src/main" />
 		</jar>
+		<jar destfile="${dir.out}/poetry-${version.number}-all.jar">
+			<zipfileset src="${dir.out}/poetry-${version.number}.jar" />
+			<zipfileset src="${dir.out}/poetry-${version.number}-sources.jar" />
+			<zipfileset src="lib/javapoet-${version.javapoet}.jar" />
+			<manifest>
+				<attribute name="Implementation-Version" value="${version.number}" />
+			</manifest>
+		</jar>
 	</target>
 
 	<target name="test" depends="compile" description="execute all tests">
 		<path id="junit.class.path">
 			<pathelement path="${dir.out}/test/classes" />
-			<pathelement path="${dir.out}/poetry-${version.number}.jar" />
+			<pathelement path="${dir.out}/poetry-${version.number}-all.jar" />
 			<pathelement path="lib/test/junit-4.12.jar" />
 			<pathelement path="lib/test/java-hamcrest-2.0.0.0.jar" />
 		</path>

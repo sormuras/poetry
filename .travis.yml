@@ -19,6 +19,4 @@ deploy:
     tags: true
   api_key: 
     secure: UMgfOtu9DpF1KXizMI3tQEHsPOtDqwrwJ4GpSjcJX5ZN3SHuCZWY5igle1QbHRfQj9SJMnpUy5FSHrFlCPCDLyTz2DCfdYUnuu1nWTNIj54rfOUVF9tlEIJidcfHMJZUcWUnukGgP8DVbRLIF/AU6LpOwJ7mE6w8aKaf9xAG0VlG3aFTn2HdRqt04kS7hf0OEJc2XVWpGkqJLTRd2qwHRJCOhOtPdzE16EXMXPmxjuMkfHp7NaSNacXyYwocXOGfRmuHg2tU+AeFUhfpPQmLLZ710MNF2UZUUIFuQsa4dW0Rgkp818658tSRd7Wg/CcyhC9bXl21YZnkzn8SZe0kvKDZGoKc3hKjjnSwLELScVaY+ibRfbczW/fPbjRGS7/hAfIbkxzThGPwloEvt554/yMq4jpEbv4V3e5FSvQkYLM38jBwr4z/S/sjYaDGTUIjVa1yyYAvSoRD+GlzymRJ0KodBTGHOjGtmfHywzfN5mfNLPMZMqmtNr3NV/HoHcUKrLF3+o5pKt05dVLPtrOMBtghedf5gQ7oBvoG81waZuSF9Dws3gJ+cHAoBI6lg9vEhp61zH4h8bxw59Sc/LaieihzAfJOzENv+aZV8fms28jQrTnhke3/1pFKJKYMpgKFDbLqgXJbEXCx3HMu0MZlcl9lXgRzftTuuzv6HS0Bwp8=
-  file:
-    - "./bin/ant/poetry-1.0.jar"
-    - "./bin/ant/poetry-1.0-sources.jar"
+  file: "./bin/ant/poetry-*.jar"
