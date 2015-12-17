@@ -19,15 +19,22 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * Java reflection, Javax model and JavaPoet related utilities.
@@ -82,6 +89,75 @@ public interface Poetry {
    */
   static List<AnnotationSpec> annotations(List<? extends AnnotationMirror> mirrors) {
     return mirrors.stream().map(AnnotationSpec::get).collect(Collectors.toList());
+  }
+
+
+  /**
+   * Build method call statement string using its own parameter names.
+   * <p>
+   * Same as: {@code call(method, p -> p.name)}
+   * 
+   * @param method method to call
+   * @return method call statement
+   */
+  static String call(MethodSpec method) {
+    return call(method, p -> p.name);
+  }
+
+  /**
+   * Build method call statement string using its own parameter names.
+   * <p>
+   * If parameter names are provided {@link String#indexOf(String, int)} yields:
+   * {@code "indexOf(str, fromIndex)"}.
+   * 
+   * @param method method to call
+   * @param parameterName calculates name of the parameter
+   * @return method call statement
+   */
+  static String call(MethodSpec method, Function<ParameterSpec, String> parameterName) {
+    if (method.parameters.isEmpty())
+      return method.name + "()";
+    StringBuilder builder = new StringBuilder();
+    builder.append(method.name);
+    builder.append('(');
+    for (ParameterSpec parameter : method.parameters) {
+      if (builder.length() > method.name.length() + 1)
+        builder.append(", ");
+      builder.append(parameterName.apply(parameter));
+    }
+    builder.append(')');
+    return builder.toString();
+  }
+
+  /**
+   * Create type spec builder for the interface spec provided.
+   *
+   * @param interfaceSpec the interface to implement
+   * @param name the class name
+   * @return the class spec implementing all methods found in interfaceSpec
+   */
+  static TypeSpec.Builder implement(TypeSpec interfaceSpec, String interfacePackage, String name,
+      Function<MethodSpec, CodeBlock> coder) {
+    TypeSpec.Builder builder = TypeSpec.classBuilder(name)
+        .addModifiers(Modifier.PUBLIC)
+        .addSuperinterface(ClassName.get(interfacePackage, interfaceSpec.name));
+    interfaceSpec.methodSpecs.forEach(m -> builder.addMethod(override(m, coder).build()));
+    return builder;
+  }
+
+  static MethodSpec.Builder override(MethodSpec method, Function<MethodSpec, CodeBlock> coder) {
+    if (method.isConstructor())
+      throw new IllegalArgumentException("constructor not supported");
+    MethodSpec.Builder builder = MethodSpec.methodBuilder(method.name)
+        .addJavadoc(method.javadoc.toString())
+        .addAnnotations(method.annotations)
+        .addModifiers(Modifier.PUBLIC)
+        .returns(method.returnType)
+        .addTypeVariables(method.typeVariables)
+        .addParameters(method.parameters)
+        .addExceptions(method.exceptions);
+    builder.addCode(coder.apply(method));
+    return builder;
   }
 
 }
