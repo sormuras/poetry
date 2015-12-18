@@ -77,4 +77,10 @@ public class Manager extends ForwardingJavaFileManager<StandardJavaFileManager> 
     map.put(className, object);
     return object;
   }
+
+  @Override
+  public boolean isSameFile(FileObject a, FileObject b) {
+    return a.toUri().equals(b.toUri());
+  }
+
 }
