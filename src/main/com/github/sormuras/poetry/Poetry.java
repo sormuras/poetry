@@ -46,7 +46,8 @@ public interface Poetry {
   /**
    * Create annotated type name instance from reflected annotated type.
    * 
-   * @param type annotated type to inspect
+   * @param type
+   *          annotated type to inspect
    * @return annotated type name
    */
   static TypeName annotated(AnnotatedType type) {
@@ -60,7 +61,8 @@ public interface Poetry {
   /**
    * Create annotated type name instance from type mirror.
    * 
-   * @param mirror annotated type mirror to inspect
+   * @param mirror
+   *          annotated type mirror to inspect
    * @return annotated type name
    */
   static TypeName annotated(TypeMirror mirror) {
@@ -71,10 +73,23 @@ public interface Poetry {
     return TypeName.get(mirror).annotated(annotations(annotated.getAnnotationMirrors()));
   }
 
+  static AnnotationSpec annotation(Class<? extends Annotation> type, Object... values) {
+    return annotation(ClassName.get(type), values);
+  }
+
+  static AnnotationSpec annotation(ClassName type, Object... values) {
+    AnnotationSpec.Builder builder = AnnotationSpec.builder(type);
+    for (Object value : values) {
+      value(builder, "value", value);
+    }
+    return builder.build();
+  }
+
   /**
    * Convert annotations to annotation spec list.
    *
-   * @param annotations source collection
+   * @param annotations
+   *          source collection
    * @return a list of annotation specs
    */
   static List<AnnotationSpec> annotations(Annotation... annotations) {
@@ -84,20 +99,21 @@ public interface Poetry {
   /**
    * Convert annotation mirrors to annotation spec list.
    *
-   * @param mirrors source collection
+   * @param mirrors
+   *          source collection
    * @return a list of annotation specs
    */
   static List<AnnotationSpec> annotations(List<? extends AnnotationMirror> mirrors) {
     return mirrors.stream().map(AnnotationSpec::get).collect(Collectors.toList());
   }
 
-
   /**
    * Build method call statement string using its own parameter names.
    * <p>
    * Same as: {@code call(method, p -> p.name)}
    * 
-   * @param method method to call
+   * @param method
+   *          method to call
    * @return method call statement
    */
   static String call(MethodSpec method) {
@@ -107,11 +123,12 @@ public interface Poetry {
   /**
    * Build method call statement string using its own parameter names.
    * <p>
-   * If parameter names are provided {@link String#indexOf(String, int)} yields:
-   * {@code "indexOf(str, fromIndex)"}.
+   * If parameter names are provided {@link String#indexOf(String, int)} yields: {@code "indexOf(str, fromIndex)"}.
    * 
-   * @param method method to call
-   * @param parameterName calculates name of the parameter
+   * @param method
+   *          method to call
+   * @param parameterName
+   *          calculates name of the parameter
    * @return method call statement
    */
   static String call(MethodSpec method, Function<ParameterSpec, String> parameterName) {
@@ -132,8 +149,10 @@ public interface Poetry {
   /**
    * Create type spec builder for the interface spec provided.
    *
-   * @param interfaceSpec the interface to implement
-   * @param name the class name
+   * @param interfaceSpec
+   *          the interface to implement
+   * @param name
+   *          the class name
    * @return the class spec implementing all methods found in interfaceSpec
    */
   static TypeSpec.Builder implement(TypeSpec interfaceSpec, String interfacePackage, String name,
@@ -158,6 +177,27 @@ public interface Poetry {
         .addExceptions(method.exceptions);
     builder.addCode(coder.apply(method));
     return builder;
+  }
+  
+  /**
+   * Delegates to {@link #addMember(String, String, Object...)}, with parameter {@code format}
+   * depending on the given {@code value} object. Falls back to {@code "$L"} literal format if
+   * the class of the given {@code value} object is not supported.
+   */
+  static AnnotationSpec.Builder value(AnnotationSpec.Builder builder, String memberName, Object value) {
+    if (value instanceof Class<?>) {
+      return builder.addMember(memberName, "$T.class", value);
+    }
+    if (value instanceof Enum) {
+      return builder.addMember(memberName, "$T.$L", value.getClass(), ((Enum<?>) value).name());
+    }
+    if (value instanceof String) {
+      return builder.addMember(memberName, "$S", value);
+    }
+    if (value instanceof Float) {
+      return builder.addMember(memberName, "$Lf", value);
+    }
+    return builder.addMember(memberName, "$L", value);
   }
 
 }

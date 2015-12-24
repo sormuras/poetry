@@ -19,10 +19,23 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.sormuras.poetry.Poetry;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 @SuppressWarnings("javadoc")
 public class PoetryTest {
+  
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface AnnotationC {
+    String value();
+  }
+  
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface AnnotationD {
+    String[] value() default "default";
+  }
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.PARAMETER, ElementType.TYPE_USE})
@@ -93,5 +106,47 @@ public class PoetryTest {
       return true;
     }
   }
+  
 
+  @Test public void createSimpleAnnotation() {
+    String className = getClass().getCanonicalName();
+    AnnotationSpec d = Poetry.annotation(AnnotationD.class);
+    Assert.assertEquals(d.toString(), "@" + className + ".AnnotationD");
+    d = Poetry.annotation(AnnotationD.class, "abc");
+    Assert.assertEquals(d.toString(), "@" + className + ".AnnotationD(\"abc\")");
+    d = Poetry.annotation(AnnotationD.class, "a", "b", "c");
+    Assert.assertEquals(d.toString(), "@" + className + ".AnnotationD({\"a\", \"b\", \"c\"})");
+  }
+
+  @Test public void createSimpleSuppressWarnings() {
+    AnnotationSpec a = Poetry.annotation(SuppressWarnings.class, "javadoc", "null");
+    AnnotationSpec b = AnnotationSpec.builder(SuppressWarnings.class)
+        .addMember("value", "$S", "javadoc")
+        .addMember("value", "$S", "null")
+        .build();
+    AnnotationSpec.Builder c = AnnotationSpec.builder(SuppressWarnings.class);
+        Poetry.value(c, "value", "javadoc");
+        Poetry.value(c, "value", "null");
+    Assert.assertEquals(a, b);
+    Assert.assertEquals(a, c.build());    
+  }
+
+  @Test public void createSimpleAnnotationWithTypeSpec() {
+    AnnotationSpec spec = Poetry.annotation(AnnotationC.class, "test");
+    TypeSpec taco = TypeSpec.classBuilder("Taco")
+        .addAnnotation(spec)
+        .build();
+
+    Assert.assertEquals(toString(taco), ""
+        + "package com.squareup.tacos;\n"
+        + "\n"
+        + "import " + getClass().getCanonicalName() + ";\n"
+        + "\n"
+        + "@" + getClass().getSimpleName() + ".AnnotationC(\"test\")\n"
+        + "class Taco {\n"
+        + "}\n");
+  }
+  private String toString(TypeSpec typeSpec) {
+    return JavaFile.builder("com.squareup.tacos", typeSpec).build().toString();
+  }
 }
