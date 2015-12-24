@@ -26,19 +26,19 @@ import com.squareup.javapoet.TypeSpec;
 
 @SuppressWarnings("javadoc")
 public class PoetryTest {
-  
+
   @Retention(RetentionPolicy.RUNTIME)
   public @interface AnnotationC {
     String value();
   }
-  
+
   @Retention(RetentionPolicy.RUNTIME)
   public @interface AnnotationD {
     String[] value() default "default";
   }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.PARAMETER, ElementType.TYPE_USE})
+  @Target({ ElementType.PARAMETER, ElementType.TYPE_USE })
   public @interface Tag {
   }
 
@@ -98,6 +98,7 @@ public class PoetryTest {
   @SupportedAnnotationTypes("com.github.sormuras.poetry.PoetryTest.Tag")
   private class A3 extends AbstractProcessor {
     List<TypeName> names = new ArrayList<>();
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
       for (Element element : roundEnv.getElementsAnnotatedWith(Tag.class)) {
@@ -106,9 +107,9 @@ public class PoetryTest {
       return true;
     }
   }
-  
 
-  @Test public void createSimpleAnnotation() {
+  @Test
+  public void createSimpleAnnotation() {
     String className = getClass().getCanonicalName();
     AnnotationSpec d = Poetry.annotation(AnnotationD.class);
     Assert.assertEquals(d.toString(), "@" + className + ".AnnotationD");
@@ -118,20 +119,22 @@ public class PoetryTest {
     Assert.assertEquals(d.toString(), "@" + className + ".AnnotationD({\"a\", \"b\", \"c\"})");
   }
 
-  @Test public void createSimpleSuppressWarnings() {
+  @Test
+  public void createSimpleSuppressWarnings() {
     AnnotationSpec a = Poetry.annotation(SuppressWarnings.class, "javadoc", "null");
     AnnotationSpec b = AnnotationSpec.builder(SuppressWarnings.class)
         .addMember("value", "$S", "javadoc")
         .addMember("value", "$S", "null")
         .build();
     AnnotationSpec.Builder c = AnnotationSpec.builder(SuppressWarnings.class);
-        Poetry.value(c, "value", "javadoc");
-        Poetry.value(c, "value", "null");
+    Poetry.value(c, "value", "javadoc");
+    Poetry.value(c, "value", "null");
     Assert.assertEquals(a, b);
-    Assert.assertEquals(a, c.build());    
+    Assert.assertEquals(a, c.build());
   }
 
-  @Test public void createSimpleAnnotationWithTypeSpec() {
+  @Test
+  public void createSimpleAnnotationWithTypeSpec() {
     AnnotationSpec spec = Poetry.annotation(AnnotationC.class, "test");
     TypeSpec taco = TypeSpec.classBuilder("Taco")
         .addAnnotation(spec)
@@ -146,6 +149,7 @@ public class PoetryTest {
         + "class Taco {\n"
         + "}\n");
   }
+
   private String toString(TypeSpec typeSpec) {
     return JavaFile.builder("com.squareup.tacos", typeSpec).build().toString();
   }

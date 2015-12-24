@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ArrayType;
@@ -46,6 +47,7 @@ public interface Poetry {
   /**
    * Create annotated type name instance from reflected annotated type.
    * 
+   * @since 1.8
    * @param type
    *          annotated type to inspect
    * @return annotated type name
@@ -61,11 +63,13 @@ public interface Poetry {
   /**
    * Create annotated type name instance from type mirror.
    * 
+   * @since 1.8
    * @param mirror
    *          annotated type mirror to inspect
    * @return annotated type name
    */
   static TypeName annotated(TypeMirror mirror) {
+    assert mirror instanceof AnnotatedConstruct;
     TypeMirror annotated = mirror;
     while (annotated.getKind() == TypeKind.ARRAY) {
       annotated = ((ArrayType) annotated).getComponentType();
@@ -164,6 +168,15 @@ public interface Poetry {
     return builder;
   }
 
+  /**
+   * Create method spec builder for the given method spec.
+   *
+   * @param method
+   *          the method to override
+   * @param coder
+   *          the code block supplier
+   * @return the method builder overriding the other method
+   */
   static MethodSpec.Builder override(MethodSpec method, Function<MethodSpec, CodeBlock> coder) {
     if (method.isConstructor())
       throw new IllegalArgumentException("constructor not supported");
@@ -178,26 +191,35 @@ public interface Poetry {
     builder.addCode(coder.apply(method));
     return builder;
   }
-  
+
   /**
-   * Delegates to {@link #addMember(String, String, Object...)}, with parameter {@code format}
-   * depending on the given {@code value} object. Falls back to {@code "$L"} literal format if
-   * the class of the given {@code value} object is not supported.
+   * Delegates to {@link builder#addMember(String, String, Object...)}, with parameter {@code format} depending on the given {@code value}
+   * object.
+   * 
+   * Falls back to {@code "$L"} literal format if the class of the given {@code value} object is not supported.
+   * 
+   * @param builder
+   *          add value to that builder
+   * @param member
+   *          member name, like {@code "value"}
+   * @param value
+   *          object to assign to member
+   * @return the {@code builder} passed as first argument
    */
-  static AnnotationSpec.Builder value(AnnotationSpec.Builder builder, String memberName, Object value) {
+  static AnnotationSpec.Builder value(AnnotationSpec.Builder builder, String member, Object value) {
     if (value instanceof Class<?>) {
-      return builder.addMember(memberName, "$T.class", value);
+      return builder.addMember(member, "$T.class", value);
     }
     if (value instanceof Enum) {
-      return builder.addMember(memberName, "$T.$L", value.getClass(), ((Enum<?>) value).name());
+      return builder.addMember(member, "$T.$L", value.getClass(), ((Enum<?>) value).name());
     }
     if (value instanceof String) {
-      return builder.addMember(memberName, "$S", value);
+      return builder.addMember(member, "$S", value);
     }
     if (value instanceof Float) {
-      return builder.addMember(memberName, "$Lf", value);
+      return builder.addMember(member, "$Lf", value);
     }
-    return builder.addMember(memberName, "$L", value);
+    return builder.addMember(member, "$L", value);
   }
 
 }
