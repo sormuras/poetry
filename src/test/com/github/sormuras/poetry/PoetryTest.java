@@ -1,5 +1,7 @@
 package com.github.sormuras.poetry;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,6 +10,7 @@ import java.lang.reflect.AnnotatedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -19,11 +22,12 @@ import javax.lang.model.element.TypeElement;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.sormuras.poetry.Poetry;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -151,7 +155,7 @@ public class PoetryTest {
         .addAnnotation(spec)
         .build();
 
-    Assert.assertEquals(toString(taco), ""
+    assertEquals(toString(taco), ""
         + "package com.squareup.tacos;\n"
         + "\n"
         + "import " + getClass().getCanonicalName() + ";\n"
@@ -159,6 +163,53 @@ public class PoetryTest {
         + "@" + getClass().getSimpleName() + ".AnnotationC(\"test\")\n"
         + "class Taco {\n"
         + "}\n");
+  }
+
+  @Test
+  public void compile() throws Exception {
+    JavaFile tacoFile = JavaFile.builder("com.squareup.tacos",
+        TypeSpec.classBuilder("Taco")
+            .addModifiers(Modifier.PUBLIC)
+            .addField(ClassName.get("com.squareup.tacos", "Taco", "Inner"), "inner")
+            .addType(TypeSpec.classBuilder("Inner")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .build())
+            .build())
+        .build();
+    Class<?> tacoClass = Poetry.compile(tacoFile);
+    Object taco = tacoClass.newInstance();
+    assertEquals("Taco", taco.getClass().getSimpleName());
+    assertEquals("com.squareup.tacos.Taco", taco.getClass().getCanonicalName());
+    Object a = tacoClass.getDeclaredClasses()[0].newInstance();
+    assertEquals("Inner", a.getClass().getSimpleName());
+    assertEquals("com.squareup.tacos.Taco.Inner", a.getClass().getCanonicalName());
+  }
+
+  @Test
+  public void compileAndCall() throws Exception {
+    JavaFile tacoFile = JavaFile.builder("com.squareup.tacos",
+        TypeSpec.classBuilder("Taco")
+            .addModifiers(Modifier.PUBLIC)
+            .addSuperinterface(ParameterizedTypeName.get(Callable.class, String.class))
+            .addField(String.class, "text", Modifier.FINAL)
+            .addField(Number.class, "number", Modifier.FINAL)
+            .addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(String.class, "text")
+                .addParameter(Number.class, "number")
+                .addStatement("this.text = text")
+                .addStatement("this.number = number")
+                .build())
+            .addMethod(MethodSpec.methodBuilder("call")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addStatement("return text + '-' + number")
+                .build())
+            .build())
+        .build();
+    @SuppressWarnings("unchecked")
+    Callable<String> taco = Poetry.compile(tacoFile, Callable.class, "NCC", (short) 1701);
+    assertEquals("NCC-1701", taco.call());
   }
 
   private String toString(TypeSpec typeSpec) {
