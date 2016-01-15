@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.nio.channels.ByteChannel;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -17,6 +18,7 @@ import org.junit.Test;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -34,17 +36,25 @@ public class ModelPoetryTest {
   @Test
   public void testFromInterface() throws Exception {
     TypeName testTypeName = ClassName.get("", "Test");
-    Source source = new Source("Test", ""
-        + "@" + T + "\n"
-        + "public interface Test extends Runnable, java.nio.channels.ByteChannel {\n"
-        + "  void test();\n"
-        + "}\n");
+    //Source source = new Source("Test", ""
+    //    + "@" + T + "\n"
+    //    + "interface Test extends Runnable, java.nio.channels.ByteChannel {\n"
+    //    + "  void test();\n"
+    //    + "}\n");
+    JavaFile source = JavaFile.builder("", TypeSpec.interfaceBuilder("Test")
+        .addAnnotation(Poetry.annotation(Tag.class))
+        .addSuperinterface(Runnable.class)
+        .addSuperinterface(ByteChannel.class)
+        .addMethod(MethodSpec.methodBuilder("test")
+            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            .build())
+        .build())
+        .build();
     TagProcessor processor = new TagProcessor();
-    source.getCompilerProcessors().add(processor);
-    source.compile();
+    Poetry.compile(source, processor);
     Assert.assertEquals(""
         + "@com.github.sormuras.poetry.ModelPoetryTest.Tag\n"
-        + "public interface Test extends java.lang.Runnable, java.nio.channels.ByteChannel {\n"
+        + "interface Test extends java.lang.Runnable, java.nio.channels.ByteChannel {\n"
         + "  void run();\n"
         + "\n"
         + "  boolean isOpen();\n"

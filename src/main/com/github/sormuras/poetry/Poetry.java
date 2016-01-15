@@ -18,20 +18,33 @@ import static java.util.Arrays.asList;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedType;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.processing.Processor;
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import javax.tools.JavaCompiler.CompilationTask;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -148,6 +161,68 @@ public interface Poetry {
     }
     builder.append(')');
     return builder.toString();
+  }
+
+  static Class<?> compile(JavaFile java) {
+    ClassLoader parent = java.getClass().getClassLoader();
+    List<String> options = Collections.emptyList();
+    List<Processor> processors = Collections.emptyList();
+    ClassLoader loader = compile(java, parent, options, processors);
+    try {
+      String name = java.packageName;
+      name = name.isEmpty() ? java.typeSpec.name : name + "." + java.typeSpec.name;
+      return loader.loadClass(name);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("loading class failed after successful compilation?!", e);
+    }
+  }
+
+  static <T> T compile(JavaFile java, Class<T> clazz, Object... args) {
+    try {
+      Class<? extends T> subClass = compile(java).asSubclass(clazz);
+      assert subClass.getDeclaredConstructors().length == 1 : "expected single constructor";
+      Class<?>[] types = subClass.getDeclaredConstructors()[0].getParameterTypes();
+      return (T) subClass.getConstructor(types).newInstance(args);
+    } catch (Throwable t) {
+      throw new IllegalStateException("compiling or instantiating failed", t);
+    }
+  }
+
+  static <T> T compile(JavaFile java, Class<T> clazz, Callable<Class<?>[]> typesProvider,
+      Object... args) {
+    try {
+      Class<? extends T> subClass = compile(java).asSubclass(clazz);
+      return (T) subClass.getConstructor(typesProvider.call()).newInstance(args);
+    } catch (Throwable t) {
+      throw new IllegalStateException("compiling or instantiating failed", t);
+    }
+  }
+
+  static ClassLoader compile(JavaFile java, Processor... processors) {
+    return compile(java, java.getClass().getClassLoader(), Collections.emptyList(), Arrays.asList(processors));
+  }
+
+  static ClassLoader compile(JavaFile java, ClassLoader parent, List<String> options,
+      List<Processor> processors) {
+    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    assert compiler != null : "no system java compiler available - JDK is required!";
+    DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+    StandardJavaFileManager sjfm = compiler.getStandardFileManager(
+        diagnostics,
+        Locale.getDefault(),
+        StandardCharsets.UTF_8);
+    Manager manager = new Manager(sjfm, parent);
+    CompilationTask task = compiler.getTask(
+        null, // a writer for additional output from the compiler; use System.err if null
+        manager,
+        diagnostics,
+        options,
+        null, // names of classes to be processed by annotation processing, null means no classes
+        Collections.singleton(java.toJavaFileObject()));
+    if (!processors.isEmpty()) task.setProcessors(processors);
+    boolean success = task.call();
+    if (!success) throw new RuntimeException("compilation failed" + diagnostics.getDiagnostics());
+    return manager.getClassLoader(null);
   }
 
   /**

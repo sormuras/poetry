@@ -13,6 +13,7 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import org.junit.Assert;
@@ -21,6 +22,8 @@ import org.junit.Test;
 import com.github.sormuras.poetry.Poetry;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -87,10 +90,18 @@ public class PoetryTest {
 
   @Test
   public void testA3() throws Exception {
-    Source source = new Source("A3", "interface A3 { void a3(@" + T + " int[][][] a3); }");
+    // "interface A3 { void a3(@" + T + " int[][][] a3); }"
+    JavaFile source = JavaFile.builder("", TypeSpec.interfaceBuilder("A3")
+        .addMethod(MethodSpec.methodBuilder("a3")
+            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            .addParameter(ParameterSpec.builder(int[][][].class, "a3")
+                .addAnnotation(Poetry.annotation(Tag.class))
+                .build())
+            .build())
+        .build())
+        .build();
     A3 a3 = new A3();
-    source.getCompilerProcessors().add(a3);
-    source.compile();
+    Poetry.compile(source, a3);
     Assert.assertEquals(1, a3.names.size());
     Assert.assertEquals("@" + T + " int[][][]", a3.names.get(0).toString());
   }
