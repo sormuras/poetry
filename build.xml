@@ -7,7 +7,7 @@
 	</tstamp>
 
 	<property name="version.number" value="1.06" />
-	<property name="version.javapoet" value="1.5.1" />
+	<property name="version.javapoet" value="1.6.0-SNAPSHOT" />
 	<property name="version.combined" value="${version.number}-${version.javapoet}" />
 	<property name="dir.out" value="bin/ant" />
 

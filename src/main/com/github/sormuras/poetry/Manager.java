@@ -34,11 +34,13 @@ class Manager extends ForwardingJavaFileManager<StandardJavaFileManager> {
       return stream.toByteArray();
     }
 
-    @Override public CharSequence getCharContent(boolean ignoreErrors) throws IOException {
+    @Override
+    public CharSequence getCharContent(boolean ignoreErrors) throws IOException {
       return new String(getBytes(), StandardCharsets.UTF_8.name());
     }
 
-    @Override public OutputStream openOutputStream() throws IOException {
+    @Override
+    public OutputStream openOutputStream() throws IOException {
       this.stream = new ByteArrayOutputStream(2000);
       return stream;
     }
@@ -49,7 +51,8 @@ class Manager extends ForwardingJavaFileManager<StandardJavaFileManager> {
       super(parent);
     }
 
-    @Override protected Class<?> findClass(String className) throws ClassNotFoundException {
+    @Override
+    protected Class<?> findClass(String className) throws ClassNotFoundException {
       ByteArrayFileObject object = map.get(className);
       if (object == null) {
         throw new ClassNotFoundException(className);
@@ -59,26 +62,29 @@ class Manager extends ForwardingJavaFileManager<StandardJavaFileManager> {
     }
   }
 
-  private final Map<String, ByteArrayFileObject> map = new HashMap<>();
-  private final ClassLoader parent;
+  final Map<String, ByteArrayFileObject> map = new HashMap<>();
+  final ClassLoader parent;
 
   Manager(StandardJavaFileManager standardManager, ClassLoader parent) {
     super(standardManager);
     this.parent = parent != null ? parent : getClass().getClassLoader();
   }
 
-  @Override public ClassLoader getClassLoader(Location location) {
+  @Override
+  public ClassLoader getClassLoader(Location location) {
     return new SecureLoader(parent);
   }
 
-  @Override public JavaFileObject getJavaFileForOutput(Location location, String className,
-      Kind kind, FileObject sibling) throws IOException {
+  @Override
+  public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind,
+      FileObject sibling) throws IOException {
     ByteArrayFileObject object = new ByteArrayFileObject(className, kind);
     map.put(className, object);
     return object;
   }
 
-  @Override public boolean isSameFile(FileObject a, FileObject b) {
+  @Override
+  public boolean isSameFile(FileObject a, FileObject b) {
     return a.toUri().equals(b.toUri());
   }
 }
