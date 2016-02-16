@@ -42,13 +42,17 @@ import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
 
 /**
  * Java reflection, Javax model and JavaPoet related utilities.
@@ -118,6 +122,49 @@ public interface Poetry {
    */
   static List<AnnotationSpec> annotations(List<? extends AnnotationMirror> mirrors) {
     return mirrors.stream().map(AnnotationSpec::get).collect(Collectors.toList());
+  }
+
+  static String binary(TypeName type) {
+    return binary(type, new StringBuilder()).toString();
+  }
+
+  static StringBuilder binary(TypeName type, StringBuilder builder) {
+    if (type instanceof TypeVariableName || type instanceof WildcardTypeName) {
+      throw new UnsupportedOperationException(type.getClass() + " hasn't got a binary name!");
+    }
+    if (type instanceof ClassName) {
+      ClassName className = (ClassName) type;
+      builder.append(className.topLevelClassName());
+      className.simpleNames().subList(1, className.simpleNames().size()).forEach(
+          name -> builder.append('$').append(name));
+      return builder;
+    }
+    if (type instanceof ArrayTypeName) {
+      TypeName component = ((ArrayTypeName) type).componentType;
+      builder.append('[');
+      if (component.isPrimitive()) {
+        // @formatter:off
+        if (component.equals(TypeName.BOOLEAN)) return builder.append('Z');
+        if (component.equals(TypeName.BYTE)) return builder.append('B');
+        if (component.equals(TypeName.CHAR)) return builder.append('C');
+        if (component.equals(TypeName.DOUBLE)) return builder.append('D');
+        if (component.equals(TypeName.FLOAT)) return builder.append('F');
+        if (component.equals(TypeName.INT)) return builder.append('I');
+        if (component.equals(TypeName.LONG)) return builder.append('J');
+        if (component.equals(TypeName.SHORT)) return builder.append('S');
+        // @formatter:on
+        throw new AssertionError(component + " is primitive and not handled?!");
+      }
+      builder.append(binary(component));
+      if (component instanceof ClassName) {
+        builder.append(';');
+      }
+      return builder;
+    }
+    if (type instanceof ParameterizedTypeName) {
+      return builder.append(((ParameterizedTypeName) type).rawType);
+    }
+    return builder.append(type);
   }
 
   /**

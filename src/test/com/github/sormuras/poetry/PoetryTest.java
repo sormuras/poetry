@@ -1,6 +1,7 @@
 package com.github.sormuras.poetry;
 
 import static org.junit.Assert.assertEquals;
+import static com.github.sormuras.poetry.Poetry.binary;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +10,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -210,6 +213,18 @@ public class PoetryTest {
     @SuppressWarnings("unchecked")
     Callable<String> taco = Poetry.compile(tacoFile, Callable.class, "NCC", (short) 1701);
     assertEquals("NCC-1701", taco.call());
+  }
+  
+  @Test
+  public void binaryString() {
+    assertEquals("void", binary(TypeName.VOID));
+    assertEquals("int", binary(TypeName.INT));
+    assertEquals("java.lang.Object", binary(TypeName.OBJECT));
+    assertEquals("java.lang.Thread$State", binary(TypeName.get(Thread.State.class)));
+    assertEquals("[java.util.Map$Entry;", binary(TypeName.get(Map.Entry[].class)));
+    assertEquals("[[[Z", binary(TypeName.get(boolean[][][].class)));
+    assertEquals("java.util.List", binary(ParameterizedTypeName.get(List.class, String.class)));
+    assertEquals("java.util.Set", binary(ParameterizedTypeName.get(Set.class, UUID.class)));
   }
 
   private String toString(TypeSpec typeSpec) {
