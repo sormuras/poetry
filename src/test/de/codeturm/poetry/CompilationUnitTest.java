@@ -5,19 +5,17 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.Assert;
 
-import de.codeturm.poetry.TypeDeclaration.Kind;
-
-public class JavaFileBeanTest {
+public class CompilationUnitTest {
 
   @Test
   public void simple() {
     CompilationUnit unit = new CompilationUnit("de.codeturm.poetry");
     unit.annotations.add(new Annotation("java.lang.annotation.Documented"));
     unit.annotations.add(new Annotation("de.codeturm.poetry.PackageModfierAnnotation"));
-    unit.declarations.add(new TypeDeclaration("SimpleClass", Kind.CLASS));
-    unit.declarations.add(new TypeDeclaration("SimpleEnum", Kind.ENUM));
-    unit.declarations.add(new TypeDeclaration("SimpleInterface", Kind.INTERFACE));
-    unit.declarations.add(new TypeDeclaration("SimpleAnnotation", Kind.ANNOTATION));
+    unit.declarations.add(new ClassDeclaration("SimpleClass").setModifiers("public"));
+    unit.declarations.add(new EnumDeclaration("SimpleEnum"));
+    unit.declarations.add(new InterfaceDeclaration("SimpleInterface"));
+    unit.declarations.add(new AnnotationDeclaration("SimpleAnnotation"));
     JavaPrinter printer = new JavaPrinter();
     unit.toString(printer);
     Assert.assertArrayEquals(Arrays.asList(
@@ -25,7 +23,7 @@ public class JavaFileBeanTest {
         "@de.codeturm.poetry.PackageModfierAnnotation",
         "package de.codeturm.poetry;",
         "",
-        "class SimpleClass {",
+        "public class SimpleClass {",
         "}",
         "",
         "enum SimpleEnum {",

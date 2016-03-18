@@ -36,11 +36,11 @@ public class ModelPoetryTest {
   @Test
   public void testFromInterface() throws Exception {
     TypeName testTypeName = ClassName.get("", "Test");
-    //Source source = new Source("Test", ""
-    //    + "@" + T + "\n"
-    //    + "interface Test extends Runnable, java.nio.channels.ByteChannel {\n"
-    //    + "  void test();\n"
-    //    + "}\n");
+    // Source source = new Source("Test", ""
+    // + "@" + T + "\n"
+    // + "interface Test extends Runnable, java.nio.channels.ByteChannel {\n"
+    // + " void test();\n"
+    // + "}\n");
     JavaFile source = JavaFile.builder("", TypeSpec.interfaceBuilder("Test")
         .addAnnotation(Poetry.annotation(Tag.class))
         .addSuperinterface(Runnable.class)
@@ -70,9 +70,9 @@ public class ModelPoetryTest {
         processor.interfaceBuilder.build().toString());
     TypeSpec implement = Poetry.implement(processor.interfaceBuilder.build(), "", "TestDecorator",
         m -> CodeBlock.builder()
-          .addStatement((m.returnType.equals(TypeName.VOID) ? "" : "return ") + "component."
-              + Poetry.call(m))
-          .build())
+            .addStatement((m.returnType.equals(TypeName.VOID) ? "" : "return ") + "component."
+                + Poetry.call(m))
+            .build())
         .addField(testTypeName, "component", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
         .addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
@@ -111,7 +111,7 @@ public class ModelPoetryTest {
         + "  public void test() {\n"
         + "    component.test();\n"
         + "  }\n"
-        + "}\n", 
+        + "}\n",
         implement.toString());
   }
 

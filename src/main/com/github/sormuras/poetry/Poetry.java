@@ -65,7 +65,8 @@ public interface Poetry {
    * Create annotated type name instance from reflected annotated type.
    * 
    * @since 1.8
-   * @param type annotated type to inspect
+   * @param type
+   *          annotated type to inspect
    * @return annotated type name
    */
   static TypeName annotated(AnnotatedType type) {
@@ -80,7 +81,8 @@ public interface Poetry {
    * Create annotated type name instance from type mirror.
    * 
    * @since 1.8
-   * @param mirror annotated type mirror to inspect
+   * @param mirror
+   *          annotated type mirror to inspect
    * @return annotated type name
    */
   static TypeName annotated(TypeMirror mirror) {
@@ -107,7 +109,8 @@ public interface Poetry {
   /**
    * Convert annotations to annotation spec list.
    *
-   * @param annotations source collection
+   * @param annotations
+   *          source collection
    * @return a list of annotation specs
    */
   static List<AnnotationSpec> annotations(Annotation... annotations) {
@@ -117,7 +120,8 @@ public interface Poetry {
   /**
    * Convert annotation mirrors to annotation spec list.
    *
-   * @param mirrors source collection
+   * @param mirrors
+   *          source collection
    * @return a list of annotation specs
    */
   static List<AnnotationSpec> annotations(List<? extends AnnotationMirror> mirrors) {
@@ -172,7 +176,8 @@ public interface Poetry {
    * <p>
    * Same as: {@code call(method, p -> p.name)}
    * 
-   * @param method method to call
+   * @param method
+   *          method to call
    * @return method call statement
    */
   static String call(MethodSpec method) {
@@ -182,11 +187,12 @@ public interface Poetry {
   /**
    * Build method call statement string using its own parameter names.
    * <p>
-   * If parameter names are provided {@link String#indexOf(String, int)} yields:
-   * {@code "indexOf(str, fromIndex)"}.
+   * If parameter names are provided {@link String#indexOf(String, int)} yields: {@code "indexOf(str, fromIndex)"}.
    * 
-   * @param method method to call
-   * @param parameterName calculates name of the parameter
+   * @param method
+   *          method to call
+   * @param parameterName
+   *          calculates name of the parameter
    * @return method call statement
    */
   static String call(MethodSpec method, Function<ParameterSpec, String> parameterName) {
@@ -272,8 +278,10 @@ public interface Poetry {
   /**
    * Create type spec builder for the interface spec provided.
    *
-   * @param interfaceSpec the interface to implement
-   * @param name the class name
+   * @param interfaceSpec
+   *          the interface to implement
+   * @param name
+   *          the class name
    * @return the class spec implementing all methods found in interfaceSpec
    */
   static TypeSpec.Builder implement(TypeSpec interfaceSpec, String interfacePackage, String name,
@@ -288,8 +296,10 @@ public interface Poetry {
   /**
    * Create method spec builder for the given method spec.
    *
-   * @param method the method to override
-   * @param coder the code block supplier
+   * @param method
+   *          the method to override
+   * @param coder
+   *          the code block supplier
    * @return the method builder overriding the other method
    */
   static MethodSpec.Builder override(MethodSpec method, Function<MethodSpec, CodeBlock> coder) {
@@ -308,15 +318,17 @@ public interface Poetry {
   }
 
   /**
-   * Delegates to {@link builder#addMember(String, String, Object...)}, with parameter
-   * {@code format} depending on the given {@code value} object.
+   * Delegates to {@link builder#addMember(String, String, Object...)}, with parameter {@code format} depending on the given {@code value}
+   * object.
    * 
-   * Falls back to {@code "$L"} literal format if the class of the given {@code value} object is not
-   * supported.
+   * Falls back to {@code "$L"} literal format if the class of the given {@code value} object is not supported.
    * 
-   * @param builder add value to that builder
-   * @param member member name, like {@code "value"}
-   * @param value object to assign to member
+   * @param builder
+   *          add value to that builder
+   * @param member
+   *          member name, like {@code "value"}
+   * @param value
+   *          object to assign to member
    * @return the {@code builder} passed as first argument
    */
   static AnnotationSpec.Builder value(AnnotationSpec.Builder builder, String member, Object value) {

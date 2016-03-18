@@ -214,7 +214,7 @@ public class PoetryTest {
     Callable<String> taco = Poetry.compile(tacoFile, Callable.class, "NCC", (short) 1701);
     assertEquals("NCC-1701", taco.call());
   }
-  
+
   @Test
   public void binaryString() {
     assertEquals("void", binary(TypeName.VOID));

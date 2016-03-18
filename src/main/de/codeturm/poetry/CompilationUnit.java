@@ -15,7 +15,7 @@ public class CompilationUnit {
   }
 
   /**
-   * {@linkplain http://docs.oracle.com/javase/specs/jls/se8/html/jls-7.html} 
+   * {@linkplain http://docs.oracle.com/javase/specs/jls/se8/html/jls-7.html}
    */
   public void print(JavaPrinter printer) {
     // [PackageDeclaration]
@@ -26,14 +26,14 @@ public class CompilationUnit {
           annotation.print(printer, Annotation.Context.PackageModifier);
         }
       }
-      printer.add("package %s;", packageName);
-      printer.add("");
+      printer.line("package %s;", packageName);
+      printer.line("");
     }
     // {ImportDeclaration}
     // {TypeDeclaration}
     for (TypeDeclaration javaType : declarations) {
       javaType.print(printer);
-      printer.add("");
+      printer.line("");
     }
   }
 

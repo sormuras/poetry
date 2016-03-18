@@ -46,8 +46,7 @@ import com.squareup.javapoet.TypeName;
 public final class MemberRef {
 
   /**
-   * Defines all well-known member flavours, like {@code ENUM}, {@code FIELD} and {@code METHOD},
-   * that can be refered to.
+   * Defines all well-known member flavours, like {@code ENUM}, {@code FIELD} and {@code METHOD}, that can be refered to.
    */
   public enum Kind {
     ENUM, FIELD, METHOD
@@ -136,7 +135,7 @@ public final class MemberRef {
   public final List<TypeName> typeArguments;
 
   MemberRef(Kind kind, ClassName type, String name, boolean statik) {
-    this(kind, type, name, statik, Collections.<TypeName>emptyList());
+    this(kind, type, name, statik, Collections.<TypeName> emptyList());
   }
 
   MemberRef(Kind kind, ClassName type, String name, boolean statik, List<TypeName> typeArguments) {

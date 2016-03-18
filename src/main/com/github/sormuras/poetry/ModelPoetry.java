@@ -88,11 +88,10 @@ public class ModelPoetry {
   }
 
   /**
-   * Create a method spec builder which copies {@code method} that is viewed as being a member of
-   * the specified {@code containing} class or interface.
+   * Create a method spec builder which copies {@code method} that is viewed as being a member of the specified {@code containing} class or
+   * interface.
    *
-   * This will copy its visibility modifiers, type parameters, return type, name, parameters, and
-   * throws declarations.
+   * This will copy its visibility modifiers, type parameters, return type, name, parameters, and throws declarations.
    */
   public MethodSpec.Builder buildMethod(ExecutableElement method, DeclaredType containing) {
     Objects.requireNonNull(method, "method == null");

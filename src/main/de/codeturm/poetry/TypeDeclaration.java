@@ -1,34 +1,40 @@
 package de.codeturm.poetry;
 
-public class TypeDeclaration {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-  public enum Kind {
+public abstract class TypeDeclaration {
 
-    ANNOTATION, CLASS, ENUM, INTERFACE;
-
-    public String literal() {
-      if (this == ANNOTATION) {
-        return "@interface";
-      }
-      return name().toLowerCase();
-    }
-
-  }
-
-  public Kind kind;
+  public List<Annotation> annotations = new ArrayList<>();
+  public final String keyword;
+  public List<String> modifiers = new ArrayList<>();
   public String name;
 
-  public TypeDeclaration(String name, Kind kind) {
+  protected TypeDeclaration(String keyword, String name) {
+    this.keyword = keyword;
     this.name = name;
-    this.kind = kind;
   }
 
   public void print(JavaPrinter printer) {
-    printer.add("%s %s {", kind.literal(), name);
+    printDeclarationHead(printer);
+    printer.append("{");
     printer.inc();
-    // members...
+    // type body...
     printer.dec();
-    printer.add("}");
+    printer.line("}");
+  }
+
+  public void printDeclarationHead(JavaPrinter printer) {
+    if (!modifiers.isEmpty()) {
+      printer.append(String.join(" ", modifiers));
+    }
+    printer.append("%s %s", keyword, name);
+  }
+
+  public TypeDeclaration setModifiers(String... modifiers) {
+    Collections.addAll(this.modifiers, modifiers);
+    return this;
   }
 
 }
