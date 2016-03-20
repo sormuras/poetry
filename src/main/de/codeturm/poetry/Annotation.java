@@ -21,7 +21,7 @@ public class Annotation {
     }
     switch (target) {
     case TYPE_USE:
-      printer.inline(false, "@%s", name);
+      printer.inline("@%s ", name);
       return;
     default:
       printer.newline("@%s", name);

@@ -1,25 +1,24 @@
 package de.codeturm.poetry;
 
 import java.lang.annotation.ElementType;
-import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Annotatable<T> {
-
-  public List<Annotation> annotations = new ArrayList<>();
-
-  public T addAnnotation(String name) {
-    return addAnnotation(new Annotation(name));
-  }
+public interface Annotatable<T> {
 
   @SuppressWarnings("unchecked")
-  public T addAnnotation(Annotation annotation) {
-    annotations.add(annotation);
+  default T addAnnotation(Annotation annotation) {
+    getAnnotations().add(annotation);
     return (T) this;
   }
 
-  public void printAnnotations(JavaPrinter printer, ElementType elementType) {
-    for (Annotation annotation : annotations) {
+  default T addAnnotation(String name) {
+    return addAnnotation(new Annotation(name));
+  }
+
+  List<Annotation> getAnnotations();
+
+  default void printAnnotations(JavaPrinter printer, ElementType elementType) {
+    for (Annotation annotation : getAnnotations()) {
       annotation.print(printer, elementType);
     }
   }

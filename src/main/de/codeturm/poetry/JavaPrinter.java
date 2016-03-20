@@ -31,10 +31,6 @@ public class JavaPrinter {
   }
 
   public JavaPrinter inline(String format, Object... args) {
-    return inline(true, format, args);
-  }
-
-  public JavaPrinter inline(boolean space, String format, Object... args) {
     if (format.isEmpty()) {
       return this;
     }
@@ -45,9 +41,6 @@ public class JavaPrinter {
     }
     builder.setLength(0);
     builder.append(lines.get(appendPointer));
-    if (space) {
-      builder.append(" ");
-    }
     builder.append(args.length == 0 ? format : String.format(format, args));
     lines.set(appendPointer, builder.toString());
     return this;

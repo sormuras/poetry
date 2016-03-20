@@ -4,13 +4,19 @@ import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompilationUnit extends Annotatable<CompilationUnit> {
+public class CompilationUnit implements Annotatable<CompilationUnit> {
 
+  public List<Annotation> annotations = new ArrayList<>();
   public List<TypeDeclaration<?>> declarations = new ArrayList<>();
   public String packageName = "";
 
   public CompilationUnit(String packageName) {
     this.packageName = packageName;
+  }
+  
+  @Override
+  public List<Annotation> getAnnotations() {
+    return annotations;
   }
 
   /**
@@ -20,7 +26,7 @@ public class CompilationUnit extends Annotatable<CompilationUnit> {
     printer.context.compilationUnit = this;
     // [PackageDeclaration]
     if (!packageName.isEmpty()) {
-      super.printAnnotations(printer, ElementType.PACKAGE);
+      printAnnotations(printer, ElementType.PACKAGE);
       printer.newline("package %s;", packageName);
       printer.newline("");
     }
