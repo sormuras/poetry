@@ -1,19 +1,31 @@
 package de.codeturm.poetry;
 
+import java.lang.annotation.ElementType;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Annotation {
 
-  public enum Context {
-    PackageModifier
-  }
-
   public String name;
+  public List<ElementType> targets = new ArrayList<>();
 
   public Annotation(String name) {
     this.name = name;
   }
 
-  public void print(JavaPrinter printer, Context context) {
-    printer.line("@%s", name);
+  public void print(JavaPrinter printer, ElementType target) {
+    if (!targets.isEmpty()) {
+      if (!targets.contains(target)) {
+        throw new AssertionError("Annotation not allowed here!");
+      }
+    }
+    switch (target) {
+    case TYPE_USE:
+      printer.inline(false, "@%s", name);
+      return;
+    default:
+      printer.newline("@%s", name);
+    }
   }
 
 }

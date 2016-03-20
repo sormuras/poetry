@@ -1,6 +1,10 @@
 package de.codeturm.poetry;
 
-public class ClassDeclaration extends TypeDeclaration {
+import de.codeturm.poetry.type.ClassType;
+
+public class ClassDeclaration extends TypeDeclaration<ClassDeclaration> {
+  
+  public ClassType superClass = ClassType.OBJECT;
 
   public ClassDeclaration(String name) {
     super("class", name);
@@ -10,7 +14,15 @@ public class ClassDeclaration extends TypeDeclaration {
   public void printDeclarationHead(JavaPrinter printer) {
     super.printDeclarationHead(printer);
     // [TypeParameters]
-    // [Superclass]
+    if (superClass != ClassType.OBJECT) {
+      printer.inline("extends");
+      superClass.print(printer); 
+    }
     // [Superinterfaces]
+  }
+
+  public ClassDeclaration setSuperClass(ClassType superClass) {
+    this.superClass = superClass;
+    return this;
   }
 }

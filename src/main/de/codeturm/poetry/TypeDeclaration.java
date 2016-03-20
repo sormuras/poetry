@@ -1,14 +1,18 @@
 package de.codeturm.poetry;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static java.util.stream.Collectors.toList;
 
-public abstract class TypeDeclaration {
+import java.lang.annotation.ElementType;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
-  public List<Annotation> annotations = new ArrayList<>();
+import javax.lang.model.element.Modifier;
+
+public abstract class TypeDeclaration<T> extends Annotatable<T> {
+
   public final String keyword;
-  public List<String> modifiers = new ArrayList<>();
+  public Set<Modifier> modifiers = EnumSet.noneOf(Modifier.class);
   public String name;
 
   protected TypeDeclaration(String keyword, String name) {
@@ -17,24 +21,28 @@ public abstract class TypeDeclaration {
   }
 
   public void print(JavaPrinter printer) {
+    printer.context.typeDeclaration = this;
     printDeclarationHead(printer);
-    printer.append("{");
+    printer.inline("{");
     printer.inc();
     // type body...
     printer.dec();
-    printer.line("}");
+    printer.newline("}");
   }
 
   public void printDeclarationHead(JavaPrinter printer) {
-    if (!modifiers.isEmpty()) {
-      printer.append(String.join(" ", modifiers));
+    for (Annotation annotation : annotations) {
+      annotation.print(printer, ElementType.TYPE);
     }
-    printer.append("%s %s", keyword, name);
+    printer.inline(String.join(" ", modifiers.stream().map(m -> m.toString()).collect(toList())));
+    printer.inline("%s", keyword);
+    printer.inline("%s", name);
   }
 
-  public TypeDeclaration setModifiers(String... modifiers) {
-    Collections.addAll(this.modifiers, modifiers);
-    return this;
+  @SuppressWarnings("unchecked")
+  public T setModifiers(String... modifiers) {
+    Arrays.asList(modifiers).forEach(n -> this.modifiers.add(Modifier.valueOf(n.toUpperCase())));
+    return (T) this;
   }
 
 }

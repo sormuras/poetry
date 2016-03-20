@@ -1,39 +1,34 @@
 package de.codeturm.poetry;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class CompilationUnit {
+public class CompilationUnit extends Annotatable<CompilationUnit> {
 
-  public List<Annotation> annotations = new ArrayList<>();
-  public List<TypeDeclaration> declarations = new ArrayList<>();
-  public List<String> packages = new ArrayList<>();
+  public List<TypeDeclaration<?>> declarations = new ArrayList<>();
+  public String packageName = "";
 
   public CompilationUnit(String packageName) {
-    this.packages = Arrays.asList(packageName.split("\\."));
+    this.packageName = packageName;
   }
 
   /**
    * {@linkplain http://docs.oracle.com/javase/specs/jls/se8/html/jls-7.html}
    */
   public void print(JavaPrinter printer) {
+    printer.context.compilationUnit = this;
     // [PackageDeclaration]
-    String packageName = String.join(".", packages);
     if (!packageName.isEmpty()) {
-      if (!annotations.isEmpty()) {
-        for (Annotation annotation : annotations) {
-          annotation.print(printer, Annotation.Context.PackageModifier);
-        }
-      }
-      printer.line("package %s;", packageName);
-      printer.line("");
+      super.printAnnotations(printer, ElementType.PACKAGE);
+      printer.newline("package %s;", packageName);
+      printer.newline("");
     }
     // {ImportDeclaration}
     // {TypeDeclaration}
-    for (TypeDeclaration javaType : declarations) {
-      javaType.print(printer);
-      printer.line("");
+    for (TypeDeclaration<?> type : declarations) {
+      type.print(printer);
+      printer.newline("");
     }
   }
 
