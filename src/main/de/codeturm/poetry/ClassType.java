@@ -4,30 +4,45 @@ import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClassType implements ReferenceType {
 
-  public static final ClassType OBJECT = new ClassType("java.lang", "Object");
+  public static final ClassType BOOLEAN = new ClassType("boolean");
+  public static final ClassType BYTE = new ClassType("byte");
+  public static final ClassType CHAR = new ClassType("char");
+  public static final ClassType DOUBLE = new ClassType("double");
+  public static final ClassType FLOAT = new ClassType("float");
+  public static final ClassType INT = new ClassType("int");
+  public static final ClassType LONG = new ClassType("long");
+  public static final ClassType OBJECT = new ClassType("java.lang", new Name("Object"));
+  public static final ClassType SHORT = new ClassType("short");
+  public static final ClassType VOID = new ClassType("void");
 
+
+  public List<Name> names = new ArrayList<>();
   public String packageName = "";
-  public List<AnnotatedIdentifier> parts = new ArrayList<>();
 
-  // java.lang.@T Thread t = null;
-  // java.lang.Thread.@T State s = null;
-  // java.util.Map.@T Entry<Byte, Byte> e = null;
-  // de.codeturm.poetry.type.@T ClassType.@T @U Inner i = null;
+  private ClassType(String keyword) {
+    this("", new Name(keyword));
+  }
 
-  public ClassType(String packageName, String... simpleNames) {
+  public ClassType(String packageName, String... names) {
     this.packageName = packageName;
-    Arrays.asList(simpleNames).forEach(n -> parts.add(new AnnotatedIdentifier(n)));
+    this.names = Arrays.asList(names).stream().map(n -> new Name(n)).collect(Collectors.toList());
+  }
+
+  public ClassType(String packageName, Name... names) {
+    this.packageName = packageName;
+    this.names = Arrays.asList(names);
   }
 
   public ClassType addAnnotation(Annotation annotation) {
-    return addAnnotation(parts.size() - 1, annotation);
+    return addAnnotation(names.size() - 1, annotation);
   }
 
   public ClassType addAnnotation(int index, Annotation annotation) {
-    parts.get(index).addAnnotation(annotation);
+    names.get(index).addAnnotation(annotation);
     return this;
   }
 
@@ -35,7 +50,7 @@ public class ClassType implements ReferenceType {
     if (!packageName.isEmpty()) {
       printer.add("%s.", packageName);
     }
-    for (AnnotatedIdentifier part : parts) {
+    for (Name part : names) {
       part.print(printer, ElementType.TYPE_USE);
     }
     return this;

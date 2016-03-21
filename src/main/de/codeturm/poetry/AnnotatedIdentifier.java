@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * {@code /Annotation/ Identifier}
  */
-public class AnnotatedIdentifier implements Annotatable<AnnotatedIdentifier> {
+public abstract class AnnotatedIdentifier implements Annotatable<AnnotatedIdentifier> {
 
   public List<Annotation> annotations = new ArrayList<>();
   public String name = "";
@@ -21,8 +21,8 @@ public class AnnotatedIdentifier implements Annotatable<AnnotatedIdentifier> {
     return annotations;
   }
 
-  public void print(JavaPrinter printer, ElementType elementType) {
-    printAnnotations(printer, elementType);
+  public void print(JavaPrinter printer, ElementType annotationTarget) {
+    printAnnotations(printer, annotationTarget);
     printer.add("%s", name);
   }
 

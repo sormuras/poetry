@@ -10,11 +10,12 @@ public class ToStringTest {
     Assert.assertEquals("java.lang.Object[]", new ArrayType(ClassType.OBJECT, 1).toString());
     Assert.assertEquals("java.lang.Object[][][]", new ArrayType(ClassType.OBJECT, 3).toString());
     ArrayType actual = new ArrayType(ClassType.OBJECT, 3);
-    actual.addAnnotation(0, new Annotation("", "T"));
-    actual.addAnnotation(1, new Annotation("", "S"));
-    actual.addAnnotation(1, new Annotation("", "T"));
-    actual.addAnnotation(2, new Annotation("", "T"));
-    Assert.assertEquals("java.lang.Object@T []@S @T []@T []", actual.toString());
+    actual.addAnnotation(0, new Annotation(new TypeName("test", "T")));
+    actual.addAnnotation(1, new Annotation(new TypeName("test", "S")));
+    actual.addAnnotation(1, new Annotation(new TypeName("test", "T")));
+    actual.addAnnotation(2, new Annotation(new TypeName("test", "T")));
+    Assert.assertEquals("java.lang.Object@test.T []@test.S @test.T []@test.T []",
+        actual.toString());
   }
 
 }

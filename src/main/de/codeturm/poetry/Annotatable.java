@@ -1,6 +1,7 @@
 package de.codeturm.poetry;
 
 import java.lang.annotation.ElementType;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -15,15 +16,15 @@ public interface Annotatable<T> {
   }
 
   default T addAnnotation(String packageName, String... simpleNames) {
-    return addAnnotation(new Annotation(packageName, simpleNames));
+    return addAnnotation(new Annotation(new TypeName(packageName, Arrays.asList(simpleNames))));
   }
 
   List<Annotation> getAnnotations();
 
-  default void printAnnotations(JavaPrinter printer, ElementType elementType) {
+  default void printAnnotations(JavaPrinter printer, ElementType annotationTarget) {
     for (Annotation annotation : getAnnotations()) {
-      annotation.print(printer, elementType);
-      if (newLineSet.contains(elementType)) {
+      annotation.print(printer, annotationTarget);
+      if (newLineSet.contains(annotationTarget)) {
         printer.newline();
       }
     }
