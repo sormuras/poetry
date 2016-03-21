@@ -2,15 +2,22 @@ package de.codeturm.poetry;
 
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public class Annotation {
 
-  public String name;
+  public static final EnumSet<ElementType> addSpaceSet = EnumSet.of(ElementType.TYPE_USE);
+
+  public ClassType type;
   public List<ElementType> targets = new ArrayList<>();
 
-  public Annotation(String name) {
-    this.name = name;
+  public Annotation(String packageName, String... simpleNames) {
+    this(new ClassType(packageName, simpleNames));
+  }
+
+  public Annotation(ClassType type) {
+    this.type = type;
   }
 
   public void print(JavaPrinter printer, ElementType target) {
@@ -19,12 +26,10 @@ public class Annotation {
         throw new AssertionError("Annotation not allowed here!");
       }
     }
-    switch (target) {
-    case TYPE_USE:
-      printer.inline("@%s ", name);
-      return;
-    default:
-      printer.newline("@%s", name);
+    printer.add("@");
+    type.print(printer);
+    if (addSpaceSet.contains(target)) {
+      printer.add(" ");
     }
   }
 

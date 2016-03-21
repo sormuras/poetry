@@ -5,18 +5,19 @@ import java.util.List;
 
 public class JavaPrinter {
 
-  public class Context {
-    public CompilationUnit compilationUnit;
-    public TypeDeclaration<?> typeDeclaration;
-  }
-
-  private int appendPointer = Integer.MIN_VALUE;
-  private StringBuilder builder = new StringBuilder();
-  public Context context = new Context();
+  private StringBuilder currentLine = new StringBuilder();
   public String indentation = "  ";
   private int indentationDepth = 0;
   public List<String> lines = new ArrayList<>();
   public String linesDelimiter = "\n";
+
+  public JavaPrinter add(String format, Object... args) {
+    if (format.isEmpty()) {
+      return this;
+    }
+    currentLine.append(args.length == 0 ? format : String.format(format, args));
+    return this;
+  }
 
   public JavaPrinter dec() {
     indentationDepth--;
@@ -30,34 +31,24 @@ public class JavaPrinter {
     return this;
   }
 
-  public JavaPrinter inline(String format, Object... args) {
-    if (format.isEmpty()) {
-      return this;
+  public JavaPrinter newline() {
+    String newline = "";
+    if (currentLine.length() > 0) {
+      int capacity = indentationDepth * indentation.length() + currentLine.length();
+      StringBuilder indented = new StringBuilder(capacity);
+      for (int i = 0; i < indentationDepth; i++) {
+        indented.append(indentation);
+      }
+      indented.append(currentLine.toString().trim());
+      newline = indented.toString();
+      currentLine.setLength(0);
     }
-    if (appendPointer == Integer.MIN_VALUE) {
-      newline(format, args);
-      appendPointer = lines.size() - 1;
-      return this;
-    }
-    builder.setLength(0);
-    builder.append(lines.get(appendPointer));
-    builder.append(args.length == 0 ? format : String.format(format, args));
-    lines.set(appendPointer, builder.toString());
+    lines.add(newline);
     return this;
   }
 
-  public JavaPrinter newline(String format, Object... args) {
-    appendPointer = Integer.MIN_VALUE;
-    if (format.isEmpty()) {
-      lines.add("");
-      return this;
-    }
-    builder.setLength(0);
-    for (int i = 0; i < indentationDepth; i++) {
-      builder.append(indentation);
-    }
-    builder.append(args.length == 0 ? format : String.format(format, args));
-    lines.add(builder.toString());
-    return this;
+  @Override
+  public String toString() {
+    return String.join(linesDelimiter, lines) + currentLine;
   }
 }

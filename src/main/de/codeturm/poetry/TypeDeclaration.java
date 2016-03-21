@@ -27,26 +27,28 @@ public abstract class TypeDeclaration<T> implements Annotatable<T> {
   }
 
   public void print(JavaPrinter printer) {
-    printer.context.typeDeclaration = this;
     printDeclarationHead(printer);
-    printer.inline(" {");
+    printer.add(" {");
+    printer.newline();
     printer.inc();
     // type body...
     printer.dec();
-    printer.newline("}");
+    printer.add("}");
+    printer.newline();
   }
 
+  /**
+   * Print modifiers, keyword (class) and name inline.
+   */
   public void printDeclarationHead(JavaPrinter printer) {
-    for (Annotation annotation : annotations) {
-      annotation.print(printer, ElementType.TYPE);
-    }
+    printAnnotations(printer, ElementType.TYPE);
     for (Modifier modifier : modifiers) {
-      printer.inline("%s", modifier);
-      printer.inline(" ");
+      printer.add("%s", modifier);
+      printer.add(" ");
     }
-    printer.inline("%s", keyword);
-    printer.inline(" ");
-    printer.inline("%s", name);
+    printer.add("%s", keyword);
+    printer.add(" ");
+    printer.add("%s", name);
   }
 
   @SuppressWarnings("unchecked")

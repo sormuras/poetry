@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-import de.codeturm.poetry.type.ClassType;
-
 public class ClassDeclaration extends TypeDeclaration<ClassDeclaration> {
 
   public ClassType superClass = ClassType.OBJECT;
@@ -20,23 +18,28 @@ public class ClassDeclaration extends TypeDeclaration<ClassDeclaration> {
     super.printDeclarationHead(printer);
     // [TypeParameters]
     if (!typeParameters.isEmpty()) {
-      printer.inline("<");
+      printer.add("<");
       ListIterator<TypeParameter> iterator = typeParameters.listIterator();
       while (iterator.hasNext()) {
         TypeParameter typeParameter = iterator.next();
         if (iterator.previousIndex() > 0) {
-          printer.inline(", ");
+          printer.add(", ");
         }
         typeParameter.print(printer);        
       }
-      printer.inline(">");
+      printer.add(">");
     }
     // [Superclass]
     if (superClass != ClassType.OBJECT) {
-      printer.inline(" extends ");
+      printer.add(" extends ");
       superClass.print(printer);
     }
     // [Superinterfaces]
+  }
+  
+  public ClassDeclaration addTypeParameter(TypeParameter typeParameter) {
+    typeParameters.add(typeParameter);
+    return this;
   }
 
   public ClassDeclaration setSuperClass(ClassType superClass) {

@@ -23,18 +23,17 @@ public class CompilationUnit implements Annotatable<CompilationUnit> {
    * {@linkplain http://docs.oracle.com/javase/specs/jls/se8/html/jls-7.html}
    */
   public void print(JavaPrinter printer) {
-    printer.context.compilationUnit = this;
     // [PackageDeclaration]
     if (!packageName.isEmpty()) {
       printAnnotations(printer, ElementType.PACKAGE);
-      printer.newline("package %s;", packageName);
-      printer.newline("");
+      printer.add("package %s;", packageName).newline();
+      printer.newline();
     }
     // {ImportDeclaration}
     // {TypeDeclaration}
     for (TypeDeclaration<?> type : declarations) {
       type.print(printer);
-      printer.newline("");
+      printer.newline();
     }
   }
 
@@ -45,7 +44,7 @@ public class CompilationUnit implements Annotatable<CompilationUnit> {
 
   public String toString(JavaPrinter printer) {
     print(printer);
-    return String.join(printer.linesDelimiter, printer.lines);
+    return printer.toString();
   }
 
 }

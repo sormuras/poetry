@@ -1,12 +1,8 @@
-package de.codeturm.poetry.type;
+package de.codeturm.poetry;
 
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.codeturm.poetry.Annotatable;
-import de.codeturm.poetry.Annotation;
-import de.codeturm.poetry.JavaPrinter;
 
 /**
  * {@code /Annotation/ Identifier}
@@ -27,7 +23,7 @@ public class AnnotatedIdentifier implements Annotatable<AnnotatedIdentifier> {
 
   public void print(JavaPrinter printer, ElementType elementType) {
     printAnnotations(printer, elementType);
-    printer.inline("%s", name);
+    printer.add("%s", name);
   }
 
 }

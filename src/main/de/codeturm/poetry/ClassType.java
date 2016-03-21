@@ -1,14 +1,11 @@
-package de.codeturm.poetry.type;
+package de.codeturm.poetry;
 
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.codeturm.poetry.Annotation;
-import de.codeturm.poetry.JavaPrinter;
-
-public class ClassType extends ReferenceType {
+public class ClassType implements ReferenceType {
 
   public static final ClassType OBJECT = new ClassType("java.lang", "Object");
 
@@ -36,7 +33,7 @@ public class ClassType extends ReferenceType {
 
   public ClassType print(JavaPrinter printer) {
     if (!packageName.isEmpty()) {
-      printer.inline("%s.", packageName);
+      printer.add("%s.", packageName);
     }
     for (AnnotatedIdentifier part : parts) {
       part.print(printer, ElementType.TYPE_USE);
